@@ -1,0 +1,53 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "Clean Code",
+      "author": "Robert C. Martin",
+      "isbn": "9780132350884",
+      "quantity": 5
+    },
+    {
+      "id": "a0c9",
+      "title": "Clean Code-2",
+      "author": "Robert-2",
+      "isbn": "1237972222",
+      "quantity": 4
+    }
+  ],
+  "checkouts": [
+    {
+      "id": 1,
+      "bookId": 1,
+      "borrower": "John Doe",
+      "checkoutDate": "2026-01-15"
+    },
+    {
+      "id": "98f3",
+      "bookId": "a0c9",
+      "borrower": "Rohit",
+      "checkoutDate": "2026-01-29"
+    }
+  ],
+  "returns": [
+    {
+      "id": 1,
+      "bookId": 1,
+      "returnDate": "2026-01-20"
+    },
+    {
+      "id": "e32a",
+      "bookId": "a0c9",
+      "returnDate": "2026-01-29"
+    }
+  ],
+  "inventoryUpdates": [
+    {
+      "id": 1,
+      "bookId": 1,
+      "oldQuantity": 5,
+      "newQuantity": 7,
+      "updatedAt": "2026-01-18"
+    }
+  ]
+}

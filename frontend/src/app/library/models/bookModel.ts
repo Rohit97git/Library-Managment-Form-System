@@ -4,4 +4,6 @@ export interface BookModel {
   author: string;
   isbn: string;
   quantity: number;
+  lastBorrower?: string;
+  lastCheckoutDate?: string;
 }

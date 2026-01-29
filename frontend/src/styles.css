@@ -7,3 +7,13 @@ body {
   @apply min-h-screen bg-gradient-to-br
              from-blue-500 via-indigo-500 to-rose-500;
 }
+.form-label {
+  @apply block text-sm font-semibold text-slate-700;
+}
+
+.form-input {
+  @apply w-full rounded-xl border border-slate-300
+         px-4 py-3 text-slate-700
+         focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500
+         outline-none transition;
+}

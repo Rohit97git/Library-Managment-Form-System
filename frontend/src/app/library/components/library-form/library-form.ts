@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LibraryServices } from '../../services/library-services';
 import { noFutureDate } from '../../validatrors/date-validator';
 import { BookModel } from '../../models/bookModel';
-import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-library-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './library-form.html',
-  styleUrl: './library-form.css',
 })
 export class LibraryForm implements OnInit {
   form!: FormGroup;
@@ -23,17 +22,14 @@ export class LibraryForm implements OnInit {
     private libraryService: LibraryServices,
   ) {}
 
-  ngOnInit(): void {
-    this.libraryService.books$.subscribe((b) => (this.books = b));
+  ngOnInit() {
     this.buildForm();
-
-    this.form = this.fb.group({
-      operation: [''],
-      data: this.fb.group({}),
-    });
+    this.libraryService.books$.subscribe((b) => (this.books = b));
 
     this.form.get('operation')?.valueChanges.subscribe((op) => {
-      this.onOperationChange(op);
+      this.operation = op;
+      this.successMsg = '';
+      this.buildDynamicForm(op);
     });
   }
 
@@ -44,34 +40,40 @@ export class LibraryForm implements OnInit {
     });
   }
 
-  onOperationChange(op: string) {
-    this.operation = op;
+  buildDynamicForm(op: string) {
     const data = this.fb.group({});
 
     switch (op) {
       case 'add':
         data.addControl('title', this.fb.control('', Validators.required));
         data.addControl('author', this.fb.control('', Validators.required));
-        data.addControl('isbn', this.fb.control('', Validators.pattern(/^(97(8|9))?\d{9}(\d|X)$/)));
-        data.addControl('quantity', this.fb.control('', Validators.min(1)));
+        data.addControl(
+          'isbn',
+          this.fb.control('', [Validators.required, Validators.pattern(/^(97(8|9))?\d{9}(\d|X)$/)]),
+        );
+        data.addControl(
+          'quantity',
+          this.fb.control(null, [Validators.required, Validators.min(1)]),
+        );
         break;
 
       case 'checkout':
         data.addControl('bookId', this.fb.control(null, Validators.required));
         data.addControl('borrower', this.fb.control('', Validators.required));
-        data.addControl('date', this.fb.control(null, noFutureDate));
+        data.addControl('date', this.fb.control(null, [Validators.required, noFutureDate]));
         break;
 
-      //Return Book
       case 'return':
         data.addControl('bookId', this.fb.control(null, Validators.required));
-        data.addControl('returnDate', this.fb.control(null, noFutureDate));
+        data.addControl('date', this.fb.control(null, [Validators.required, noFutureDate]));
         break;
 
-      //Update Inventory
       case 'update':
         data.addControl('bookId', this.fb.control(null, Validators.required));
-        data.addControl('quantity', this.fb.control(1, [Validators.required, Validators.min(1)]));
+        data.addControl(
+          'quantity',
+          this.fb.control(null, [Validators.required, Validators.min(1)]),
+        );
         break;
     }
 
@@ -79,7 +81,11 @@ export class LibraryForm implements OnInit {
   }
 
   submitForm() {
+    if (this.form.invalid) return;
+
     const value = this.form.value.data;
+
+    if (!confirm(`Confirm ${this.operation} operation?`)) return;
 
     switch (this.operation) {
       case 'add':
@@ -87,17 +93,20 @@ export class LibraryForm implements OnInit {
         break;
 
       case 'checkout':
-        this.libraryService.checkOutBook(value.bookId);
+        this.libraryService.checkoutBook(value.bookId, value.borrower, value.date);
         break;
 
       case 'return':
-        this.libraryService.returnBook(value.bookId);
+        this.libraryService.returnBook(value.bookId, value.date);
         break;
 
       case 'update':
         this.libraryService.updateInventory(value.bookId, value.quantity);
+        break;
     }
+
     this.successMsg = 'Operation completed successfully!';
     this.form.reset();
+    this.operation = '';
   }
 }

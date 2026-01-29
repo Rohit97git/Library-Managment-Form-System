@@ -1,29 +1,149 @@
-<div class="min-h-screen flex items-center justify-center px-4">
+<div class="min-h-screen bg-slate-100 flex justify-center py-14 px-4">
   <form
     [formGroup]="form"
-    class="max-w-2x mt-10 p-8 bg-white rounded-2xl shadow-lg space-y-6 m-auto"
+    (ngSubmit)="submitForm()"
+    class="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 space-y-10"
   >
-    <!-- Section-Header -->
+    <!-- Header -->
+    <h1 class="text-3xl font-bold text-center text-slate-800">📚 Library Book Management</h1>
 
-    <h2 class="text-2xl font-semibold text-gray-800 text-center">Library Book Management</h2>
+    <!-- Operation Selector -->
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-700"> Select Operation </label>
 
-    <!-- Operational Selector Section -->
-
-    <div clas="space-y-1">
-      <label class="block text-sm font-medium text-gray-600 mb-2"> Select Operation </label>
-
-      <select
-        formControlName="operation"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-      >
-        <option value="">Choose an Operation</option>
-        <option value="add">Add new Book</option>
-        <option value="checkout">Checkout Book</option>
-        <option value="return">Return Book</option>
-        <option value="update">Update Inventory</option>
+      <select formControlName="operation" class="form-input">
+        <option value="">Choose an operation</option>
+        <option value="add">➕ Add New Book</option>
+        <option value="checkout">📤 Checkout Book</option>
+        <option value="return">📥 Return Book</option>
+        <option value="update">🔄 Update Inventory</option>
       </select>
     </div>
 
     <!-- Dynamic Form Area -->
+    <div formGroupName="data" class="space-y-8">
+      <!-- ================= ADD NEW BOOK ================= -->
+      <div *ngIf="operation === 'add'" class="space-y-6">
+        <div class="space-y-1">
+          <label class="form-label">Book Title</label>
+          <input formControlName="title" class="form-input" placeholder="Clean Code" />
+          <p
+            *ngIf="form.get('data.title')?.touched && form.get('data.title')?.invalid"
+            class="text-red-600 text-sm"
+          >
+            Book title is required
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <label class="form-label">Author</label>
+          <input formControlName="author" class="form-input" placeholder="Robert C. Martin" />
+          <p
+            *ngIf="form.get('data.author')?.touched && form.get('data.author')?.invalid"
+            class="text-red-600 text-sm"
+          >
+            Author name is required
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-1">
+            <label class="form-label">ISBN</label>
+            <input formControlName="isbn" class="form-input" placeholder="9780132350884" />
+            <p
+              *ngIf="form.get('data.isbn')?.touched && form.get('data.isbn')?.invalid"
+              class="text-red-600 text-sm"
+            >
+              Enter a valid ISBN
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="form-label">Quantity</label>
+            <input type="number" formControlName="quantity" class="form-input" placeholder="5" />
+            <p
+              *ngIf="form.get('data.quantity')?.touched && form.get('data.quantity')?.invalid"
+              class="text-red-600 text-sm"
+            >
+              Quantity must be at least 1
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= BOOK SELECT (ALL EXCEPT ADD) ================= -->
+      <div *ngIf="form.get('data.bookId')" class="space-y-1">
+        <label class="form-label">Select Book</label>
+        <select formControlName="bookId" class="form-input">
+          <option value="">Select a book</option>
+          <option *ngFor="let b of books" [value]="b.id">
+            {{ b.title }} ({{ b.quantity }} available)
+          </option>
+        </select>
+        <p
+          *ngIf="form.get('data.bookId')?.touched && form.get('data.bookId')?.invalid"
+          class="text-red-600 text-sm"
+        >
+          Book selection is required
+        </p>
+      </div>
+
+      <!-- ================= CHECKOUT ONLY ================= -->
+      <div *ngIf="form.get('data.borrower')" class="space-y-1">
+        <label class="form-label">Borrower Name</label>
+        <input formControlName="borrower" class="form-input" placeholder="John Doe" />
+        <p
+          *ngIf="form.get('data.borrower')?.touched && form.get('data.borrower')?.invalid"
+          class="text-red-600 text-sm"
+        >
+          Borrower name is required
+        </p>
+      </div>
+
+      <!-- ================= DATE (CHECKOUT + RETURN) ================= -->
+      <div *ngIf="form.get('data.date')" class="space-y-1">
+        <label class="form-label">
+          {{ operation === 'checkout' ? 'Checkout Date' : 'Return Date' }}
+        </label>
+        <input type="date" formControlName="date" class="form-input" />
+        <p
+          *ngIf="form.get('data.date')?.touched && form.get('data.date')?.hasError('required')"
+          class="text-red-600 text-sm"
+        >
+          Date is required
+        </p>
+        <p
+          *ngIf="form.get('data.date')?.touched && form.get('data.date')?.hasError('futureDate')"
+          class="text-red-600 text-sm"
+        >
+          Date cannot be in the future
+        </p>
+      </div>
+
+      <!-- ================= UPDATE INVENTORY ================= -->
+      <div *ngIf="operation === 'update'" class="space-y-1">
+        <label class="form-label">New Quantity</label>
+        <input
+          type="number"
+          formControlName="quantity"
+          class="form-input"
+          placeholder="Updated quantity"
+        />
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      [disabled]="!operation || form.invalid"
+      class="w-full py-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+    >
+      Submit Operation
+    </button>
+
+    <!-- Success Message -->
+    <div *ngIf="successMsg" class="text-green-700 text-center font-semibold">
+      ✅ {{ successMsg }}
+    </div>
   </form>
 </div>
