@@ -1,0 +1,29 @@
+<div class="min-h-screen flex items-center justify-center px-4">
+  <form
+    [formGroup]="form"
+    class="max-w-2x mt-10 p-8 bg-white rounded-2xl shadow-lg space-y-6 m-auto"
+  >
+    <!-- Section-Header -->
+
+    <h2 class="text-2xl font-semibold text-gray-800 text-center">Library Book Management</h2>
+
+    <!-- Operational Selector Section -->
+
+    <div clas="space-y-1">
+      <label class="block text-sm font-medium text-gray-600 mb-2"> Select Operation </label>
+
+      <select
+        formControlName="operation"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+      >
+        <option value="">Choose an Operation</option>
+        <option value="add">Add new Book</option>
+        <option value="checkout">Checkout Book</option>
+        <option value="return">Return Book</option>
+        <option value="update">Update Inventory</option>
+      </select>
+    </div>
+
+    <!-- Dynamic Form Area -->
+  </form>
+</div>
